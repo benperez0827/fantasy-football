@@ -528,10 +528,10 @@ function advBody(rows,cols,effIdx){
 
 function drawNav(){
   const BUCKETS=[
-    ['Draft your team',[['board','Draft Board'],['rank','Rankings'],['sharp','Sharp Takes']]],
+    ['Draft your team',[['board','Draft Board'],['rank','Rankings']]],
     ['Set your lineup',[['week','Weekly Matchups'],['dvp','Defense vs Pos']]],
     ['Team environment',[['off','Offseason Trends'],['sch','Schedule (SoS)'],['team','Team Context']]],
-    ['Under the hood',[['master','Player Stats'],['pers','Personnel'],['trench','Trenches']]],
+    ['Under the hood',[['master','Player Stats'],['pers','Personnel'],['trench','Trenches'],['sharp','Sharp Takes']]],
   ];
   const cur=(state.view==='adv')?'master':state.view;
   document.getElementById('topnav').innerHTML=BUCKETS.map(b=>{
