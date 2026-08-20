@@ -719,13 +719,13 @@ function renderBoard(){
     }
     act+='</td>';
     const ad=state.boardPlat?platAdp(r[1],state.boardPlat):adpGet(r[1]);
-    const name=(tg==='target'?'<span class="star-ic">★</span>':'')+r[1]+badge(r[8])+sharpBadge(r[1])+statusBadge(r[1],r[2])+takeBadge(r[1],r[2])+mtagBadge(r[1],r[2])+gapIcon(r[0],ad)+(nt&&!boardEdit?`<span class="notetag" title="${escAttr(nt)}">📝</span>`:'');
+    const name=(tg==='target'?'<span class="star-ic">★</span>':'')+r[1]+badge(r[8])+sharpBadge(r[1])+statusBadge(r[1],r[2])+takeBadge(r[1],r[2])+mtagBadge(r[1],r[2])+gapIcon(BB[bk(r)],ad)+(nt&&!boardEdit?`<span class="notetag" title="${escAttr(nt)}">📝</span>`:'');
     const prk=boardPosRank()[bk(r)];const mr=liveModelRank(r[1],r[2]);const ep=ecrPlus(r[1],r[2]);
     const cells='<td class="l">'+name+'</td><td class="l">'+r[2]+'</td><td class="l">'+r[3]+'</td>'
       +takeCtrl(r[1],r[2])
       +bcell(r[4],4,r[2])+bcell(r[5],5,r[2])+bcell(r[6],6,r[2])
       +'<td>'+(prk||'—')+'</td><td class="l">'+(r[2]+r[7])+'</td><td>'+(r[9]==null?'—':r[9])+'</td>'
-      +'<td>'+(mr==null?'—':mr)+'</td><td>'+(ep==null?'—':ep)+'</td>'+boardAdpCell(ad,r[0]);
+      +'<td>'+(mr==null?'—':mr)+'</td><td>'+(ep==null?'—':ep)+'</td>'+boardAdpCell(ad,BB[bk(r)]);
     const noteCell=boardEdit?`<td class="l"><input class="note-in" value="${escAttr(nt)}" placeholder="note…" onchange="setNote('${ek}',this.value)"></td>`:'';
     body+=`<tr class="${cls}">${act}<td>${BB[bk(r)]||r[0]}</td>${cells}${offCell(offAmp(r[3],r[2]))}${sosCell(schAmp(r[3],r[2]))}${noteCell}</tr>`;
     if(BOARD.tiers[k])body+=`<tr class="tierdiv"><td colspan="${cols.length+8+(boardEdit?1:0)}">— your tier break —</td></tr>`;
