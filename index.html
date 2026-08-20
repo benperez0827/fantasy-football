@@ -110,6 +110,8 @@ td.mt-fade{background:rgba(155,45,45,.20)}
 .gapi{font-size:12px;margin-left:4px;vertical-align:middle}
 .gapi.val{color:#1f9d4d}
 .gapi.rea{color:#d24b4b}
+.bwlab{font-size:12px;color:var(--dim);display:inline-flex;align-items:center;gap:4px;margin-right:4px}
+.bwlab input{background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:5px;padding:3px 5px}
 .mt-tag{max-width:96px}
 .draftbar{border-top:1px dashed var(--border);padding-top:8px}
 .dlabel{font-size:12px;font-weight:700;color:var(--dim)}
@@ -302,7 +304,7 @@ let BOARD=Object.assign({drafted:{},tag:{},note:{},order:null,tiers:{}},loadBoar
 ['drafted','tag','note','tiers'].forEach(k=>{if(!BOARD[k]||typeof BOARD[k]!=='object')BOARD[k]={};});
 function saveBoard(){try{localStorage.setItem('ffboard',JSON.stringify(BOARD))}catch(e){}}
 function bk(r){return r[1]+'|'+r[2]+'|'+r[3];}
-let boardEdit=false,boardHideDrafted=false,boardSort=0;
+let boardEdit=false,boardHideDrafted=false,boardSort='blend';
 function setBoardEdit(){boardEdit=!boardEdit;renderBody();}
 function setBoardHide(v){boardHideDrafted=v;renderBody();}
 function setBoardSort(s){boardSort=s;renderBody();}
@@ -578,7 +580,7 @@ function renderGuide(){
   <div class="gcard">
     <ol class="gsteps">
       <li>Set your <b>scoring format</b> (top-left dropdown) — PPR, Half, or Standard. Everything re-ranks to match.</li>
-      <li>Open the <b>Draft Board</b> — your big-board, opening in primary ranking order. This is the screen you'll use on draft night.</li>
+      <li>Open the <b>Draft Board</b> — your big-board, opening in a blended draft rank (projected value + Model + consensus, all tunable). This is the screen you'll use on draft night.</li>
       <li>Open <b>Rankings</b> to compare Composite, Model, and ECR head-to-head and spot disagreements.</li>
       <li>Make it yours: nudge players with <b>My Take ▲▼</b>, tag your <b>Sleepers</b> and <b>My Guys</b>, and set your <b>Platform</b> to surface values &amp; reaches.</li>
       <li>Come back anytime — your changes save automatically in this browser. Before draft day, <b>Export</b> a backup (see below).</li>
@@ -654,11 +656,35 @@ function renderGuide(){
   </div>
   </div>`;
 }
+function loadBW(){try{const o=JSON.parse(localStorage.getItem('ffbw')||'{}');return {vbd:(o.vbd!=null?o.vbd:0.5),model:(o.model!=null?o.model:0.25),ecrp:(o.ecrp!=null?o.ecrp:0.25)};}catch(e){return{vbd:0.5,model:0.25,ecrp:0.25};}}
+let BW=loadBW();let _bbr=null,_bbrSig=null;
+function saveBW(){try{localStorage.setItem('ffbw',JSON.stringify(BW))}catch(e){}}
+function setBW(k,v){BW[k]=Math.max(0,Math.min(1,(+v||0)));saveBW();_bbr=null;reRenderBoard();}
+function resetBW(){BW={vbd:0.5,model:0.25,ecrp:0.25};saveBW();_bbr=null;reRenderBoard();}
+function boardBlend(){
+  const sig=state.scoring+'|'+JSON.stringify(BW)+'|'+JSON.stringify(MW());
+  if(_bbr&&_bbrSig===sig)return _bbr;
+  buildModelRanks();buildEcrMaps();
+  const arr=S().draftboard.map(r=>{
+    const vbd=r[0], mr=liveModelRank(r[1],r[2]), ep=ecrPlus(r[1],r[2]);
+    const soft=(r[2]==='QB'||r[2]==='TE')?0.4:1.0;
+    const parts=[[BW.vbd,vbd]];
+    if(mr!=null)parts.push([BW.model*soft,mr]);
+    if(ep!=null)parts.push([BW.ecrp,ep]);
+    const tw=parts.reduce((a,x)=>a+x[0],0)||1;
+    const sc=parts.reduce((a,x)=>a+x[0]*x[1],0)/tw;
+    return [bk(r),sc];
+  });
+  arr.sort((a,b)=>a[1]-b[1]);
+  const m={};arr.forEach((x,i)=>m[x[0]]=i+1);
+  _bbr=m;_bbrSig=sig;return _bbr;
+}
 function renderBoard(){
   const m=document.getElementById('main');
   const all=S().draftboard;
   let raw=all.slice();
   if(boardSort==='my'){const ord=effOrder();const oi={};ord.forEach((k,i)=>oi[k]=i);raw.sort((a,b)=>oi[bk(a)]-oi[bk(b)]);}
+  else if(boardSort==='blend'){const bb=boardBlend();raw.sort((a,b)=>(bb[bk(a)]||999)-(bb[bk(b)]||999));}
   else if(boardSort==='off'){raw.sort((a,b)=>(offAmp(b[3],b[2])==null?-99:offAmp(b[3],b[2]))-(offAmp(a[3],a[2])==null?-99:offAmp(a[3],a[2])));}
   else if(boardSort==='sos'){raw.sort((a,b)=>(schAmp(b[3],b[2])==null?-99:schAmp(b[3],b[2]))-(schAmp(a[3],a[2])==null?-99:schAmp(a[3],a[2])));}
   else if(boardSort==='posrk'){const m=boardPosRank();raw.sort((a,b)=>(m[bk(a)]||999)-(m[bk(b)]||999));}
@@ -676,7 +702,8 @@ function renderBoard(){
   function bcell(v,ci,pos){if(v==null)return'<td>—</td>';if(state.heat){const vs=hvals(pos,ci);if(vs.length>2)return`<td${heatStyle(pct(vs,v))}>${v}</td>`;}return`<td>${v}</td>`;}
   const cols=BOARD_COLS;
   const bth=(lbl,key,cls,tip)=>`<th class="${cls||''}"${tip?` title="${tip}"`:''} onclick="setBoardSort(${typeof key==='number'?key:`'${key}'`})">${lbl}${boardSort===key?' ▾':''}</th>`;
-  const head='<tr><th class="l">Mark</th>'+bth('Rank',0)+bth('Player',1,'l')+bth('Pos',2,'l')+bth('Tm',3,'l')+'<th style="text-align:center" title="Your personal boost (▲) / fade (▼) — folds into the Composite. Tag a Sleeper or My Guy.">My Take</th>'+bth('Proj Pts',4)+bth('Proj PPG',5)+bth('VBD',6)+bth('Pos Rk','posrk','','Positional rank by projected value (VBD)')+bth('Pos Tier',7,'l')+bth('Age',9)+bth('Model','model','','Live multi-factor Model rank (same as Rankings)')+bth('ECR+','ecrp','','Expert consensus (ECR) blended with analyst notes')+bth('ADP','adp','','Early consensus market ADP for your selected scoring format. Pick a Platform above to highlight values (green) and reaches (red) vs your Composite.')+bth('Off±','off')+bth('SoS','sos')+(boardEdit?'<th class="l">Note</th>':'')+'</tr>';
+  const head='<tr><th class="l">Mark</th>'+bth('Rank','blend','','Blended draft rank = your VBD / Model / ECR+ weights (Model softened for QB/TE). Tune the weights below the board.')+bth('Player',1,'l')+bth('Pos',2,'l')+bth('Tm',3,'l')+'<th style="text-align:center" title="Your personal boost (▲) / fade (▼) — folds into the Composite. Tag a Sleeper or My Guy.">My Take</th>'+bth('Proj Pts',4)+bth('Proj PPG',5)+bth('VBD',6)+bth('Pos Rk','posrk','','Positional rank by projected value (VBD)')+bth('Pos Tier',7,'l')+bth('Age',9)+bth('Model','model','','Live multi-factor Model rank (same as Rankings)')+bth('ECR+','ecrp','','Expert consensus (ECR) blended with analyst notes')+bth('ADP','adp','','Early consensus market ADP for your selected scoring format. Pick a Platform above to highlight values (green) and reaches (red) vs your Composite.')+bth('Off±','off')+bth('SoS','sos')+(boardEdit?'<th class="l">Note</th>':'')+'</tr>';
+  const BB=boardBlend();
   let body='';
   rows.forEach(r=>{
     const k=bk(r),ek=esc(k);const dr=!!BOARD.drafted[k],tg=BOARD.tag[k],nt=BOARD.note[k]||'';
@@ -700,7 +727,7 @@ function renderBoard(){
       +'<td>'+(prk||'—')+'</td><td class="l">'+(r[2]+r[7])+'</td><td>'+(r[9]==null?'—':r[9])+'</td>'
       +'<td>'+(mr==null?'—':mr)+'</td><td>'+(ep==null?'—':ep)+'</td>'+boardAdpCell(ad,r[0]);
     const noteCell=boardEdit?`<td class="l"><input class="note-in" value="${escAttr(nt)}" placeholder="note…" onchange="setNote('${ek}',this.value)"></td>`:'';
-    body+=`<tr class="${cls}">${act}<td>${r[0]}</td>${cells}${offCell(offAmp(r[3],r[2]))}${sosCell(schAmp(r[3],r[2]))}${noteCell}</tr>`;
+    body+=`<tr class="${cls}">${act}<td>${BB[bk(r)]||r[0]}</td>${cells}${offCell(offAmp(r[3],r[2]))}${sosCell(schAmp(r[3],r[2]))}${noteCell}</tr>`;
     if(BOARD.tiers[k])body+=`<tr class="tierdiv"><td colspan="${cols.length+8+(boardEdit?1:0)}">— your tier break —</td></tr>`;
   });
   const bar=`<div class="boardbar">`
@@ -712,13 +739,14 @@ function renderBoard(){
     +`<label class="btn-sm" style="display:inline-block" title="Load a board file exported from another device">⤒ Import<input type="file" accept="application/json,.json" onchange="importBoard(this)" style="display:none"></label>`
     +`<span class="cnt"><b>${total-gone}</b> of ${total} available${gone?` · ${gone} drafted`:''}${boardSort==='my'?' · your custom order':''}</span>`
     +`</div>`;
+  const blendbar=`<div class="boardbar" style="border-top:1px dashed var(--border);padding-top:8px"><span class="dlabel">Board rank blend</span>`+[['vbd','VBD'],['model','Model'],['ecrp','ECR+']].map(k=>`<label class="bwlab">${k[1]} <input type="number" min="0" max="1" step="0.05" value="${BW[k[0]]}" style="width:54px" onchange="setBW('${k[0]}',this.value)"></label>`).join('')+`<button class="btn-sm" onclick="resetBW()">↺ 50/25/25</button><span class="qd-msg">weights auto-normalize · Model is softened for QB/TE</span></div>`;
   const _sl=sleeperState();if(_sl.on&&!_slInt)sleeperStart();
   const slBlock=_sl.on?`<span class="sl-on">● Sleeper synced</span><span class="cnt">${_sl.err==='offline'?'reconnecting…':((_sl.n||0)+' picks'+(_sl.t?' · '+Math.max(0,Math.round((Date.now()-_sl.t)/1000))+'s ago':''))}</span><button class="btn-sm" onclick="sleeperDisconnect()">Disconnect</button>`:`<input class="qd-in sl-in" placeholder="Sleeper draft ID" value="${escAttr(_sl.id||'')}"><button class="btn-sm" onclick="sleeperConnect(document.querySelector('.sl-in')?document.querySelector('.sl-in').value:'')" title="Paste your Sleeper draft ID (the long number in the draft URL)">🔴 Live sync</button>`;
   const draftbar=`<div class="boardbar draftbar"><span class="dlabel">Draft tracker</span>`+`<input class="qd-in qd-manual" list="playerdl" placeholder="Mark drafted — type a name, Enter" onkeydown="if(event.key==='Enter'){quickDraft(this.value);}">`+`<button class="btn-sm" onclick="pastePicks()">⎋ Paste picks</button>`+`<span class="dlabel" style="font-weight:400">· Live:</span>`+slBlock+(_qdMsg?`<span class="qd-msg">${_qdMsg}</span>`:'')+`</div>`;
   const help=boardEdit
     ?`Click <b>draft</b> to cross off picks, <b>★</b> target, <b>⊘</b> fade, <b>▲▼</b> to set your own order, <b>＋tier</b> to draw a tier break, and type notes. Saved only in your browser.`
     :`Mark players <b>drafted</b> as they go, <b>★</b> your targets, add <b>notes</b>. Click <b>✏️ Customize</b> to reorder players and draw your own tier breaks. Use <b>My Take ▲▼</b> to boost/fade a player (it feeds your Composite) and the dropdown to tag injuries/holdouts. Everything is private to your browser.`;
-  m.innerHTML=`${keyPanel('board')}<p class="note"><b>${state.scoring}</b> draft board — projected 2026 value for every veteran + incoming rookie (<span class="rk">R</span>). ${help}</p>${bar}${draftbar}${injBar()}<datalist id="playerdl">${S().draftboard.map(r=>'<option value="'+escAttr(r[1])+'"></option>').join('')}</datalist><div class="tablewrap"><table><thead>${head}</thead><tbody>${body}</tbody></table></div>`;
+  m.innerHTML=`${keyPanel('board')}<p class="note"><b>${state.scoring}</b> draft board — projected 2026 value for every veteran + incoming rookie (<span class="rk">R</span>). ${help}</p>${bar}${blendbar}${draftbar}${injBar()}<datalist id="playerdl">${S().draftboard.map(r=>'<option value="'+escAttr(r[1])+'"></option>').join('')}</datalist><div class="tablewrap"><table><thead>${head}</thead><tbody>${body}</tbody></table></div>`;
 }
 
 function advThead(cols){return '<tr>'+cols.map((c,i)=>`<th class="${c[1]||''}" onclick="setSort(${i})">${c[0]}${state.sortCol===i?(state.sortDir<0?' ▼':' ▲'):''}</th>`).join('')+'</tr>';}
