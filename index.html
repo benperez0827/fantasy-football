@@ -909,91 +909,93 @@ function applyView(rows){let out=rows;
 const MGMT_FLEX=['RB','WR','TE'];
 const MGMT_LEAGUES=[
 {id:'goon',name:"Goon Squad (Sunday in the Hamptons)",slots:['QB','RB','RB','WR','WR','TE','FLEX','FLEX','D/ST','K'],roster:[
- {n:'Josh Allen',pos:'QB',nfl:'BUF',opp:'@HOU',proj:19.5,mr:17,slot:'QB',start:true},
- {n:'Chase Brown',pos:'RB',nfl:'CIN',opp:'vsTB',proj:14.2,mr:11,slot:'RB',start:true},
- {n:'Omarion Hampton',pos:'RB',nfl:'LAC',opp:'vsARI',proj:16.1,mr:16,slot:'RB',start:true},
- {n:'Christian Watson',pos:'WR',nfl:'GB',opp:'@MIN',proj:9.3,mr:52,slot:'WR',start:true},
- {n:'Rome Odunze',pos:'WR',nfl:'CHI',opp:'@CAR',proj:10.7,mr:54,slot:'WR',start:true,st:'Q'},
- {n:'Isaiah Likely',pos:'TE',nfl:'NYG',opp:'vsDAL',proj:7.6,mr:107,slot:'TE',start:true},
- {n:"D'Andre Swift",pos:'RB',nfl:'CHI',opp:'@CAR',proj:11.4,mr:53,slot:'FLEX',start:true},
- {n:'DK Metcalf',pos:'WR',nfl:'PIT',opp:'vsATL',proj:10.3,mr:68,slot:'FLEX',start:true},
- {n:'Jaguars',pos:'D/ST',nfl:'JAX',opp:'vsCLE',proj:8.3,mr:null,slot:'D/ST',start:true},
- {n:'Jake Bates',pos:'K',nfl:'DET',opp:'vsNO',proj:9.1,mr:null,slot:'K',start:true},
- {n:"Wan'Dale Robinson",pos:'WR',nfl:'TEN',opp:'vsNYJ',proj:8.1,mr:79,slot:'BN',start:false},
- {n:"De'Zhaun Stribling",pos:'WR',nfl:'SF',opp:'@LAR',proj:7.9,mr:82,slot:'BN',start:false,st:'done'},
- {n:'Jacory Croskey-Merritt',pos:'RB',nfl:'WSH',opp:'@PHI',proj:7.8,mr:124,slot:'BN',start:false},
- {n:'Keaton Mitchell',pos:'RB',nfl:'LAC',opp:'vsARI',proj:5.6,mr:null,slot:'BN',start:false,st:'Q'},
- {n:'Terrance Ferguson',pos:'TE',nfl:'LAR',opp:'vsSF',proj:6.7,mr:null,slot:'BN',start:false,st:'done'},
- {n:'Caleb Douglas',pos:'WR',nfl:'MIA',opp:'@LV',proj:6.1,mr:null,slot:'BN',start:false},
- {n:'Ravens',pos:'D/ST',nfl:'BAL',opp:'@IND',proj:7.0,mr:null,slot:'BN',start:false}
+ {n:'Josh Allen',pos:'QB',nfl:'BUF',opp:'vsDET',proj:22.9,mr:17,slot:'QB',start:true},
+ {n:'Chase Brown',pos:'RB',nfl:'CIN',opp:'@HOU',proj:13.5,mr:11,slot:'RB',start:true},
+ {n:'Omarion Hampton',pos:'RB',nfl:'LAC',opp:'vsLV',proj:14.7,mr:16,slot:'RB',start:true},
+ {n:'Christian Watson',pos:'WR',nfl:'GB',opp:'@NYJ',proj:10.7,mr:52,slot:'WR',start:true},
+ {n:'Rome Odunze',pos:'WR',nfl:'CHI',opp:'vsMIN',proj:10.7,mr:54,slot:'WR',start:true},
+ {n:'Isaiah Likely',pos:'TE',nfl:'NYG',opp:'@LAR',proj:9.3,mr:107,slot:'TE',start:true},
+ {n:"D'Andre Swift",pos:'RB',nfl:'CHI',opp:'vsMIN',proj:12.5,mr:53,slot:'FLEX',start:true},
+ {n:'DK Metcalf',pos:'WR',nfl:'PIT',opp:'@NE',proj:9.3,mr:68,slot:'FLEX',start:true},
+ {n:'Ravens',pos:'D/ST',nfl:'BAL',opp:'vsNO',proj:7.0,mr:null,slot:'D/ST',start:true},
+ {n:'Jake Bates',pos:'K',nfl:'DET',opp:'@BUF',proj:8.9,mr:null,slot:'K',start:true},
+ {n:"Wan'Dale Robinson",pos:'WR',nfl:'TEN',opp:'vsPHI',proj:7.2,mr:79,slot:'BN',start:false},
+ {n:"De'Zhaun Stribling",pos:'WR',nfl:'SF',opp:'vsMIA',proj:0.0,mr:82,slot:'BN',start:false,st:'OUT'},
+ {n:'Jacory Croskey-Merritt',pos:'RB',nfl:'WSH',opp:'@DAL',proj:9.6,mr:124,slot:'BN',start:false},
+ {n:'Keaton Mitchell',pos:'RB',nfl:'LAC',opp:'vsLV',proj:7.2,mr:null,slot:'BN',start:false},
+ {n:'Terrance Ferguson',pos:'TE',nfl:'LAR',opp:'vsNYG',proj:5.0,mr:null,slot:'BN',start:false},
+ {n:'Caleb Douglas',pos:'WR',nfl:'MIA',opp:'@SF',proj:7.2,mr:null,slot:'BN',start:false},
+ {n:'Antonio Williams',pos:'WR',nfl:'WSH',opp:'@DAL',proj:4.6,mr:null,slot:'BN',start:false}
 ],fa:[
- {n:'Bryce Young',pos:'QB',nfl:'CAR',opp:'vsCHI',proj:15.9,mr:null,rost:11.0},
- {n:'Malik Willis',pos:'QB',nfl:'MIA',opp:'@LV',proj:15.3,mr:null,rost:21.2},
- {n:'Aaron Rodgers',pos:'QB',nfl:'PIT',opp:'vsATL',proj:15.0,mr:null,rost:7.5},
- {n:'Cam Ward',pos:'QB',nfl:'TEN',opp:'vsNYJ',proj:13.8,mr:null,rost:9.1},
- {n:'Geno Smith',pos:'QB',nfl:'NYJ',opp:'@TEN',proj:14.0,mr:null,rost:3.9},
- {n:'Justice Hill',pos:'RB',nfl:'BAL',opp:'@IND',proj:6.0,mr:null,rost:18.5},
- {n:'Samaje Perine',pos:'RB',nfl:'CIN',opp:'vsTB',proj:5.4,mr:null,rost:12.3},
- {n:'Kaleb Johnson',pos:'RB',nfl:'GB',opp:'@MIN',proj:1.1,mr:null,rost:6.4},
- {n:'Tre Tucker',pos:'WR',nfl:'LV',opp:'vsMIA',proj:8.4,mr:null,rost:30.7},
- {n:'Jaylin Noel',pos:'WR',nfl:'HOU',opp:'vsBUF',proj:6.8,mr:null,rost:8.0},
- {n:'Rashod Bateman',pos:'WR',nfl:'BAL',opp:'@IND',proj:6.2,mr:null,rost:9.0},
- {n:'Dontayvion Wicks',pos:'WR',nfl:'PHI',opp:'vsWSH',proj:6.0,mr:null,rost:10.2},
- {n:'Jauan Jennings',pos:'WR',nfl:'MIN',opp:'vsGB',proj:5.3,mr:null,rost:8.0},
- {n:'Michael Mayer',pos:'TE',nfl:'LV',opp:'vsMIA',proj:7.3,mr:null,rost:23.6},
- {n:'Pat Freiermuth',pos:'TE',nfl:'PIT',opp:'vsATL',proj:6.7,mr:null,rost:14.7},
- {n:'Dalton Schultz',pos:'TE',nfl:'HOU',opp:'vsBUF',proj:6.5,mr:163,rost:19.9},
- {n:'Chig Okonkwo',pos:'TE',nfl:'WSH',opp:'@PHI',proj:5.3,mr:null,rost:8.3},
- {n:'Chiefs',pos:'D/ST',nfl:'KC',opp:'vsDEN',proj:5.6,mr:null,rost:35.7},
- {n:'Titans',pos:'D/ST',nfl:'TEN',opp:'vsNYJ',proj:7.2,mr:null,rost:10.7},
- {n:'Bears',pos:'D/ST',nfl:'CHI',opp:'@CAR',proj:6.1,mr:null,rost:9.5}
+ {n:'Carson Wentz',pos:'QB',nfl:'MIN',opp:'@CHI',proj:17.1,mr:null,rost:4.1},
+ {n:'Geno Smith',pos:'QB',nfl:'NYJ',opp:'vsGB',proj:15.5,mr:null,rost:3.7},
+ {n:'Malik Willis',pos:'QB',nfl:'MIA',opp:'@SF',proj:14.2,mr:null,rost:19.1},
+ {n:'Jacoby Brissett',pos:'QB',nfl:'ARI',opp:'vsSEA',proj:13.2,mr:null,rost:5.2},
+ {n:'Aaron Rodgers',pos:'QB',nfl:'PIT',opp:'@NE',proj:13.0,mr:null,rost:7.1},
+ {n:'Cam Ward',pos:'QB',nfl:'TEN',opp:'vsPHI',proj:12.3,mr:null,rost:7.9},
+ {n:'Kyler Murray',pos:'QB',nfl:'MIN',opp:'@CHI',proj:0.0,mr:103,rost:56.3},
+ {n:'Justice Hill',pos:'RB',nfl:'BAL',opp:'vsNO',proj:6.4,mr:null,rost:16.9},
+ {n:'Devin Singletary',pos:'RB',nfl:'NYG',opp:'@LAR',proj:5.6,mr:null,rost:7.2},
+ {n:'Samaje Perine',pos:'RB',nfl:'CIN',opp:'@HOU',proj:4.9,mr:null,rost:11.3},
+ {n:'Tank Bigsby',pos:'RB',nfl:'PHI',opp:'@TEN',proj:3.2,mr:null,rost:16.7},
+ {n:'Tre Tucker',pos:'WR',nfl:'LV',opp:'@LAC',proj:7.0,mr:null,rost:27.1},
+ {n:'Kayshon Boutte',pos:'WR',nfl:'HOU',opp:'vsCIN',proj:6.3,mr:null,rost:13.5},
+ {n:'Rashod Bateman',pos:'WR',nfl:'BAL',opp:'vsNO',proj:6.2,mr:null,rost:9.2},
+ {n:'Jauan Jennings',pos:'WR',nfl:'MIN',opp:'@CHI',proj:5.6,mr:null,rost:6.9},
+ {n:'Travis Hunter',pos:'WR',nfl:'JAX',opp:'@DEN',proj:2.2,mr:null,rost:59.1},
+ {n:'Chig Okonkwo',pos:'TE',nfl:'WSH',opp:'@DAL',proj:6.0,mr:null,rost:6.7,st:'Q'},
+ {n:'Gunnar Helm',pos:'TE',nfl:'TEN',opp:'vsPHI',proj:5.9,mr:null,rost:5.0},
+ {n:'David Njoku',pos:'TE',nfl:'LAC',opp:'vsLV',proj:5.7,mr:null,rost:5.5},
+ {n:'Evan Engram',pos:'TE',nfl:'DEN',opp:'vsJAX',proj:5.4,mr:null,rost:5.2},
+ {n:'Michael Mayer',pos:'TE',nfl:'LV',opp:'@LAC',proj:4.7,mr:null,rost:25.4},
+ {n:'Chiefs',pos:'D/ST',nfl:'KC',opp:'vsIND',proj:7.4,mr:null,rost:46.5},
+ {n:'Bears',pos:'D/ST',nfl:'CHI',opp:'vsMIN',proj:6.8,mr:null,rost:9.6},
+ {n:'Jets',pos:'D/ST',nfl:'NYJ',opp:'vsGB',proj:5.4,mr:null,rost:3.9}
 ]},
 {id:'jabroni',name:"Benny P's Jabronis (All Things Analysis)",slots:['QB','RB','RB','WR','WR','TE','FLEX','FLEX','D/ST','K','HC'],roster:[
- {n:'Justin Herbert',pos:'QB',nfl:'LAC',opp:'vsARI',proj:19.2,mr:63,slot:'QB',start:true},
- {n:'Jahmyr Gibbs',pos:'RB',nfl:'DET',opp:'vsNO',proj:20.9,mr:1,slot:'RB',start:true},
- {n:'Kenny Gainwell',pos:'RB',nfl:'TB',opp:'@CIN',proj:9.2,mr:101,slot:'RB',start:true},
- {n:'DeVonta Smith',pos:'WR',nfl:'PHI',opp:'vsWSH',proj:12.4,mr:31,slot:'WR',start:true},
- {n:'Zay Flowers',pos:'WR',nfl:'BAL',opp:'@IND',proj:12.0,mr:41,slot:'WR',start:true},
- {n:'Dalton Kincaid',pos:'TE',nfl:'BUF',opp:'@HOU',proj:7.0,mr:100,slot:'TE',start:true},
- {n:'Ladd McConkey',pos:'WR',nfl:'LAC',opp:'vsARI',proj:11.6,mr:44,slot:'FLEX',start:true},
- {n:'J.K. Dobbins',pos:'RB',nfl:'DEN',opp:'@KC',proj:9.0,mr:111,slot:'FLEX',start:true},
- {n:'Chiefs',pos:'D/ST',nfl:'KC',opp:'vsDEN',proj:5.5,mr:null,slot:'D/ST',start:true},
- {n:'Evan McPherson',pos:'K',nfl:'CIN',opp:'vsTB',proj:7.3,mr:null,slot:'K',start:true},
- {n:'Packers',pos:'HC',nfl:'GB',opp:'@MIN',proj:1.9,mr:null,slot:'HC',start:true},
- {n:'Jordan Mason',pos:'RB',nfl:'MIN',opp:'vsGB',proj:8.5,mr:141,slot:'BN',start:false},
- {n:'Josh Downs',pos:'WR',nfl:'IND',opp:'vsBAL',proj:7.1,mr:115,slot:'BN',start:false},
- {n:'Jonah Coleman',pos:'RB',nfl:'DEN',opp:'@KC',proj:3.6,mr:null,slot:'BN',start:false},
- {n:'Kaelon Black',pos:'RB',nfl:'SF',opp:'@LAR',proj:2.9,mr:null,slot:'BN',start:false,st:'done'},
- {n:'Pat Bryant',pos:'WR',nfl:'DEN',opp:'@KC',proj:3.3,mr:null,slot:'BN',start:false},
- {n:'Jacob Saylors',pos:'RB',nfl:'DET',opp:'vsNO',proj:4.5,mr:null,slot:'BN',start:false},
- {n:'Oronde Gadsden',pos:'TE',nfl:'LAC',opp:'vsARI',proj:3.9,mr:118,slot:'BN',start:false},
- {n:'Isiah Pacheco',pos:'RB',nfl:'DET',opp:'vsNO',proj:0.0,mr:null,slot:'IR',start:false,st:'IR'}
+ {n:'Justin Herbert',pos:'QB',nfl:'LAC',opp:'vsLV',proj:19.8,mr:63,slot:'QB',start:true},
+ {n:'Jahmyr Gibbs',pos:'RB',nfl:'DET',opp:'@BUF',proj:22.4,mr:1,slot:'RB',start:true},
+ {n:'J.K. Dobbins',pos:'RB',nfl:'DEN',opp:'vsJAX',proj:11.1,mr:111,slot:'RB',start:true},
+ {n:'DeVonta Smith',pos:'WR',nfl:'PHI',opp:'@TEN',proj:11.5,mr:31,slot:'WR',start:true},
+ {n:'Zay Flowers',pos:'WR',nfl:'BAL',opp:'vsNO',proj:13.0,mr:41,slot:'WR',start:true,st:'Q'},
+ {n:'Dalton Kincaid',pos:'TE',nfl:'BUF',opp:'vsDET',proj:8.0,mr:100,slot:'TE',start:true},
+ {n:'Ladd McConkey',pos:'WR',nfl:'LAC',opp:'vsLV',proj:12.2,mr:44,slot:'FLEX',start:true,st:'Q'},
+ {n:'Jordan Mason',pos:'RB',nfl:'MIN',opp:'@CHI',proj:9.8,mr:141,slot:'FLEX',start:true,st:'Q'},
+ {n:'Chiefs',pos:'D/ST',nfl:'KC',opp:'vsIND',proj:7.0,mr:null,slot:'D/ST',start:true},
+ {n:'Evan McPherson',pos:'K',nfl:'CIN',opp:'@HOU',proj:6.9,mr:null,slot:'K',start:true},
+ {n:'Packers',pos:'HC',nfl:'GB',opp:'@NYJ',proj:2.0,mr:null,slot:'HC',start:true},
+ {n:'Kenny Gainwell',pos:'RB',nfl:'TB',opp:'vsCLE',proj:8.2,mr:101,slot:'BN',start:false},
+ {n:'Josh Downs',pos:'WR',nfl:'IND',opp:'@KC',proj:7.4,mr:115,slot:'BN',start:false},
+ {n:'Jonah Coleman',pos:'RB',nfl:'DEN',opp:'vsJAX',proj:1.2,mr:null,slot:'BN',start:false},
+ {n:'Kaelon Black',pos:'RB',nfl:'SF',opp:'vsMIA',proj:8.1,mr:null,slot:'BN',start:false},
+ {n:'Pat Bryant',pos:'WR',nfl:'DEN',opp:'vsJAX',proj:5.8,mr:null,slot:'BN',start:false},
+ {n:'Sione Vaki',pos:'RB',nfl:'DET',opp:'@BUF',proj:5.1,mr:null,slot:'BN',start:false},
+ {n:'Kendrick Bourne',pos:'WR',nfl:'ARI',opp:'vsSEA',proj:4.6,mr:null,slot:'BN',start:false},
+ {n:'Isiah Pacheco',pos:'RB',nfl:'DET',opp:'@BUF',proj:0.0,mr:null,slot:'IR',start:false,st:'IR'}
 ],fa:[
- {n:'Aaron Rodgers',pos:'QB',nfl:'PIT',opp:'vsATL',proj:15.0,mr:null,rost:7.5},
- {n:'Kirk Cousins',pos:'QB',nfl:'LV',opp:'vsMIA',proj:14.9,mr:null,rost:3.3},
- {n:'Dylan Sampson',pos:'RB',nfl:'CLE',opp:'@JAX',proj:4.1,mr:null,rost:19.0},
- {n:'Kaleb Johnson',pos:'RB',nfl:'GB',opp:'@MIN',proj:1.1,mr:null,rost:6.4},
- {n:'Jaylen Wright',pos:'RB',nfl:'MIA',opp:'@LV',proj:2.7,mr:null,rost:2.7},
- {n:'Kayshon Boutte',pos:'WR',nfl:'HOU',opp:'vsBUF',proj:7.3,mr:null,rost:15.9},
- {n:'Isaac TeSlaa',pos:'WR',nfl:'DET',opp:'vsNO',proj:3.6,mr:null,rost:2.8},
- {n:'Gunnar Helm',pos:'TE',nfl:'TEN',opp:'vsNYJ',proj:5.9,mr:null,rost:5.6},
- {n:'Greg Dulcich',pos:'TE',nfl:'MIA',opp:'@LV',proj:5.6,mr:null,rost:3.4},
- {n:'David Njoku',pos:'TE',nfl:'LAC',opp:'vsARI',proj:5.4,mr:null,rost:4.8},
- {n:'AJ Barner',pos:'TE',nfl:'SEA',opp:'--',proj:5.3,mr:null,rost:7.0},
- {n:'Cade Otton',pos:'TE',nfl:'TB',opp:'@CIN',proj:4.9,mr:null,rost:2.6},
- {n:'Evan Engram',pos:'TE',nfl:'DEN',opp:'@KC',proj:4.7,mr:null,rost:2.9},
- {n:'Vikings',pos:'D/ST',nfl:'MIN',opp:'vsGB',proj:5.4,mr:null,rost:13.2},
- {n:'Buccaneers',pos:'D/ST',nfl:'TB',opp:'@CIN',proj:5.3,mr:null,rost:13.1},
- {n:'Jets',pos:'D/ST',nfl:'NYJ',opp:'@TEN',proj:6.5,mr:null,rost:5.0},
- {n:'Bears',pos:'HC',nfl:'CHI',opp:'@CAR',proj:1.9,mr:null,rost:24.6},
- {n:'Jets',pos:'HC',nfl:'NYJ',opp:'@TEN',proj:1.8,mr:null,rost:3.5},
- {n:'Texans',pos:'HC',nfl:'HOU',opp:'vsBUF',proj:1.7,mr:null,rost:18.9},
- {n:'Titans',pos:'HC',nfl:'TEN',opp:'vsNYJ',proj:1.7,mr:null,rost:2.7},
- {n:'Vikings',pos:'HC',nfl:'MIN',opp:'vsGB',proj:1.6,mr:null,rost:6.9},
- {n:'Panthers',pos:'HC',nfl:'CAR',opp:'vsCHI',proj:1.6,mr:null,rost:3.4},
- {n:'Buccaneers',pos:'HC',nfl:'TB',opp:'@CIN',proj:1.1,mr:null,rost:8.6},
- {n:'Giants',pos:'HC',nfl:'NYG',opp:'vsDAL',proj:0.9,mr:null,rost:7.5},
- {n:'Colts',pos:'HC',nfl:'IND',opp:'vsBAL',proj:0.9,mr:null,rost:6.2}
+ {n:'Aaron Rodgers',pos:'QB',nfl:'PIT',opp:'@NE',proj:13.0,mr:null,rost:7.1},
+ {n:'Kirk Cousins',pos:'QB',nfl:'LV',opp:'@LAC',proj:12.6,mr:null,rost:3.3},
+ {n:'Cam Ward',pos:'QB',nfl:'TEN',opp:'vsPHI',proj:12.3,mr:null,rost:7.9},
+ {n:'Chris Rodriguez',pos:'RB',nfl:'JAX',opp:'@DEN',proj:5.4,mr:null,rost:27.8},
+ {n:'Najee Harris',pos:'RB',nfl:'NYG',opp:'@LAR',proj:0.0,mr:null,rost:9.4,st:'OUT'},
+ {n:'Jerry Jeudy',pos:'WR',nfl:'CLE',opp:'@TB',proj:6.1,mr:null,rost:24.1},
+ {n:'Kayshon Boutte',pos:'WR',nfl:'HOU',opp:'vsCIN',proj:6.3,mr:null,rost:13.5},
+ {n:'Gunnar Helm',pos:'TE',nfl:'TEN',opp:'vsPHI',proj:5.9,mr:null,rost:5.0},
+ {n:'Evan Engram',pos:'TE',nfl:'DEN',opp:'vsJAX',proj:5.4,mr:null,rost:5.2},
+ {n:'AJ Barner',pos:'TE',nfl:'SEA',opp:'@ARI',proj:5.3,mr:null,rost:6.1},
+ {n:'Greg Dulcich',pos:'TE',nfl:'MIA',opp:'@SF',proj:5.2,mr:null,rost:2.7},
+ {n:'Darren Waller',pos:'TE',nfl:'CAR',opp:'@ATL',proj:5.0,mr:null,rost:3.2},
+ {n:'Bears',pos:'D/ST',nfl:'CHI',opp:'vsMIN',proj:7.0,mr:null,rost:9.6},
+ {n:'Broncos',pos:'D/ST',nfl:'DEN',opp:'vsJAX',proj:6.4,mr:null,rost:94.3},
+ {n:'Bengals',pos:'D/ST',nfl:'CIN',opp:'@HOU',proj:5.7,mr:null,rost:6.2},
+ {n:'Jets',pos:'D/ST',nfl:'NYJ',opp:'vsGB',proj:5.7,mr:null,rost:3.9},
+ {n:'Texans',pos:'HC',nfl:'HOU',opp:'vsCIN',proj:2.2,mr:null,rost:18.1},
+ {n:'Falcons',pos:'HC',nfl:'ATL',opp:'vsCAR',proj:1.9,mr:null,rost:3.1},
+ {n:'Panthers',pos:'HC',nfl:'CAR',opp:'@ATL',proj:1.6,mr:null,rost:3.8},
+ {n:'Jets',pos:'HC',nfl:'NYJ',opp:'vsGB',proj:1.5,mr:null,rost:3.5},
+ {n:'Vikings',pos:'HC',nfl:'MIN',opp:'@CHI',proj:0.7,mr:null,rost:7.1},
+ {n:'Colts',pos:'HC',nfl:'IND',opp:'@KC',proj:-0.3,mr:null,rost:5.9},
+ {n:'Giants',pos:'HC',nfl:'NYG',opp:'@LAR',proj:-0.9,mr:null,rost:7.7}
 ]}];
 let MGMT={lg:0,tab:'team',fapos:'ALL'};
 function mgmtLgObj(){return MGMT_LEAGUES[MGMT.lg];}
@@ -1022,7 +1024,7 @@ function mgmtTeamHTML(lg){
  const SH={};Object.keys(SHraw).forEach(k=>{const v=SHraw[k]||{};SH[nrmf(v.name||k)+'|'+(v.pos||'')]=v;});
  const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
  function drank(field,val){if(!D_||!D_.dvp_plus||val==null)return null;const vals=Object.values(D_.dvp_plus).map(o=>o[field]).filter(v=>typeof v==='number').sort((a,b)=>b-a);const r=vals.indexOf(val);return r<0?null:r+1;}
- function wk1(nfl){try{const t=D_.schedule.teams[tk(nfl)];return t&&t.weeks?t.weeks.find(w=>w.wk===1):null;}catch(e){return null;}}
+ function wk1(nfl){try{const t=D_.schedule.teams[tk(nfl)];return t&&t.weeks?t.weeks.find(w=>w.wk===2):null;}catch(e){return null;}}
  function easeOf(p){const w=wk1(p.nfl);return w&&w.ease?w.ease[p.pos]:null;}
  const MGMT_ADJ={def:{'ARI':{rush:0.06,pass:0.08,why:'no D upgrades; CB G.Williams (Achilles) &amp; S Taylor-Demerson out'},'CIN':{rush:-0.06,why:'added J.Allen to the DL &mdash; tougher vs the run than 2025'},'DAL':{rush:0.05,why:'soft run D (allowed 25.7 fppg to RBs in 2025)'}},player:{'jordanmason|RB':{mult:1.10,note:'1A rushing role in MIN (camp standout over A.Jones)'},'jahmyrgibbs|RB':{mult:1.05,note:'~80-85% of snaps with Pacheco (IR) out'}}};
  function oppOf(p){const w=wk1(p.nfl);return w?tk((''+w.opp).replace('@','').replace('vs','')):null;}
@@ -1077,7 +1079,7 @@ function mgmtTeamHTML(lg){
  });
  h+='</tbody></table></div>';
  const espnTot=starters.reduce((s,p)=>s+(p.proj||0),0),mdlTot=starters.reduce((s,p)=>{const pr=prOf(p);return s+(pr?pr.pts:(p.proj||0));},0);
- h+='<p class="note">Our model projects this lineup at <b>'+mdlTot.toFixed(1)+'</b> vs ESPN’s <b>'+espnTot.toFixed(1)+'</b> for Week 1.</p>';
+ h+='<p class="note">Our model projects this lineup at <b>'+mdlTot.toFixed(1)+'</b> vs ESPN’s <b>'+espnTot.toFixed(1)+'</b> for Week 2.</p>';
  (function(){const oppsSeen=new Set();lg.roster.forEach(p=>{const o=oppOf(p);if(o)oppsSeen.add(o);});const aj=[];Object.keys(MGMT_ADJ.def).forEach(t=>{if(oppsSeen.has(t)){const d=MGMT_ADJ.def[t],soft=((d.rush||0)+(d.pass||0))>0;aj.push('<b>'+t+' defense '+(soft?'softer':'tougher')+'</b> &mdash; '+d.why);}});lg.roster.forEach(p=>{const pa=MGMT_ADJ.player[nrmf(p.n)+'|'+p.pos];if(pa&&pa.note)aj.push('<b>'+p.n+'</b> &mdash; '+pa.note);});if(aj.length)h+='<div class="mg-flag mg-ok" style="margin-top:8px"><b>🔵 Current-week adjustments</b> (override 2025 matchup data):<br>&bull; '+aj.join('<br>&bull; ')+'</div>';})();
  const bench=lg.roster.filter(p=>!p.start&&p.slot!=='IR'),ir=lg.roster.filter(p=>p.slot==='IR');
  h+='<p class="note" style="margin-top:14px"><b>Bench</b></p><div class="tablewrap"><table><tbody>';
@@ -1124,7 +1126,7 @@ function setMgmtFA(p){MGMT.fapos=p;renderMgmt();}
 function renderMgmt(){
  const lg=mgmtLgObj();
  let h='<style>.mg-b{font-size:9.5px;padding:1px 5px;border-radius:9px;font-weight:800}.mg-q{background:#f6e6b0;color:#6b5300}.mg-ir{background:#f3c9c9;color:#7a1414}.mg-done{background:#d7e0e8;color:#33424f}.mg-pos{font-weight:800;font-size:10.5px;padding:1px 5px;border-radius:4px}.mg-RB{color:#1b6b34;background:#d8f0e0}.mg-WR{color:#14507f;background:#d6e8fa}.mg-QB{color:#8a4310;background:#fbe6d4}.mg-TE{color:#5b3fa8;background:#ece0fb}.mg-DST,.mg-K,.mg-HC{color:#33424f;background:#dce6ef}.mg-flag{margin:8px 0 0;padding:9px 11px;border-radius:9px;font-size:13px;line-height:1.45}.mg-swap{background:#e6f4ea;border:1px solid #a5d6b7;color:#1b5e20}.mg-swap b{color:#0b2f16}.mg-ok{background:#eef2f6;border:1px solid #cfd8e0;color:#425362}.mg-ok b{color:#243642}.mg-up{background:#d8f0e0;color:#1b6b34;font-size:9.5px;font-weight:800;padding:1px 5px;border-radius:8px}.mg-team{opacity:.65;font-size:11.5px;margin-left:5px}</style>';
- h+='<p class="note">ESPN has no live tie-in, so this is a <b>snapshot</b> pulled Sep 11 (Week 1). <b>Proj</b> = ESPN weekly projection · <b>Mdl</b> = your model board rank.</p>';
+ h+='<p class="note">ESPN has no live tie-in, so this is a <b>snapshot</b> pulled Sep 16 (Week 2). <b>Proj</b> = ESPN weekly projection · <b>Mdl</b> = your model board rank.</p>';
  h+='<div style="margin:0 0 12px"><select onchange="setMgmtLg(this.value)" style="padding:6px 10px;border-radius:8px;font-weight:600;font-size:13.5px">'+MGMT_LEAGUES.map((l,i)=>`<option value="${i}" ${i===MGMT.lg?'selected':''}>${l.name}</option>`).join('')+'</select></div>';
  h+='<div style="margin:0 0 12px">'+[['team','My Team · Start/Sit'],['fa','Free Agents']].map(t=>`<button class="posbtn ${MGMT.tab===t[0]?'on':''}" onclick="setMgmtTab('${t[0]}')">${t[1]}</button>`).join('')+'</div>';
  h+=(MGMT.tab==='team')?mgmtTeamHTML(lg):mgmtFAHTML(lg);
