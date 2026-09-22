@@ -170,7 +170,7 @@ tr.tierdiv td{background:#8b5cf620;color:#8b5cf6;font-size:11px;text-transform:u
 <main id="main"></main>
 <script>
 const POSITIONS=['ALL','QB','RB','WR','TE'];
-const state={view:'board',week:'1',pos:'ALL',q:'',minSnap:0,sortCol:0,sortDir:1,dvpPos:'WR',
+const state={view:'mgmt',week:'1',pos:'ALL',q:'',minSnap:0,sortCol:0,sortDir:1,dvpPos:'WR',
              scoring:D.default_scoring,heat:true,persMode:'off',trenchMode:'def'};
 const MASTER_COLS=[['Player','l'],['Tm','l'],['Pos','l'],['GP'],['Total'],['PPG'],['xFP/G'],['Diff'],['Snap%'],['Tgt%'],['AY%'],['WOPR'],['OppSh%'],['L4 PPG'],['L4 xFP'],['L4 Snap'],['L4 Tgt%']];
 const MASTER_SHADE=[4,5,6,8,9,10,11,12,13,14,15,16];
@@ -785,11 +785,11 @@ function advBody(rows,cols,effIdx){
 
 function drawNav(){
   const BUCKETS=[
-    ['Draft your team',[['board','Draft Board'],['rank','Rankings'],['vr','Values & Reaches']]],
-    ['Set your lineup',[['week','Weekly Matchups'],['dvp','Defense vs Pos']]],
-    ['Team environment',[['off','Offseason Trends'],['sch','Schedule (SoS)'],['team','Team Context'],['util','Utilization Report']]],
-    ['Under the hood',[['master','Player Stats'],['pers','Personnel'],['trench','Trenches'],['sharp','Analyst Takes']]],
     ['My leagues',[['mgmt','Team Management'],['trade','Trade Evaluator']]],
+    ['Set your lineup',[['week','Weekly Matchups'],['dvp','Defense vs Pos']]],
+    ['Team environment',[['sch','Schedule (SoS)'],['team','Team Context'],['util','Utilization Report']]],
+    ['Under the hood',[['master','Player Stats'],['pers','Personnel'],['trench','Trenches']]],
+    ['Draft your team',[['board','Draft Board'],['rank','Rankings'],['vr','Values & Reaches']]],
   ];
   const cur=(state.view==='adv')?'master':state.view;
   const guideBtn=`<div class="bucket"><button class="bkbtn ${cur==='guide'?'on':''}" onclick="setView('guide')">📖 How to use</button></div>`;
