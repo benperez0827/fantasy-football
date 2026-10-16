@@ -808,7 +808,7 @@ function advBody(rows,cols,effIdx){
 function drawNav(){
   const BUCKETS=[
     ['My leagues',[['mgmt','Team Management'],['trade','Trade Evaluator']]],
-    ['Set your lineup',[['week','Weekly Matchups'],['dvp','Defense vs Pos']]],
+    ['Set your lineup',[['wkrank','Weekly Rankings'],['week','Weekly Matchups'],['dvp','Defense vs Pos']]],
     ['Team environment',[['sch','Schedule (SoS)'],['team','Team Context'],['util','Utilization Report']]],
     ['Under the hood',[['master','Player Stats'],['pers','Personnel'],['trench','Trenches'],['pulse','Analyst Pulse']]],
     ['Draft your team',[['board','Draft Board'],['rank','Rankings'],['vr','Values & Reaches']]],
@@ -836,7 +836,7 @@ function setTrenchMode(m){state.trenchMode=m;render();}
 function setUtilPos(p){state.utilPos=p;if(typeof persist==='function')persist();render();}
 function setUtilWk(w){state.utilWk=w;if(typeof persist==='function')persist();render();}
 function drawControls(){
-  if(state.view==='mgmt'||state.view==='trade'){document.getElementById('controls').innerHTML='';return;}
+  if(state.view==='mgmt'||state.view==='trade'||state.view==='wkrank'){document.getElementById('controls').innerHTML='';return;}
   let h='';
   h+=`<label class="field">Scoring<select onchange="setScoring(this.value)">${
     D.scoring_options.map(s=>`<option value="${s}" ${s===state.scoring?'selected':''}>${s}</option>`).join('')}</select></label>`;
@@ -1228,6 +1228,102 @@ function ssFA(){if(SS.mode!=='sleeper'||SS.sl.lgi<0){return '<div class="mg-flag
  fas.forEach(x=>{const p=x.p;const ease=ssEaseOf(p.team,p.pos,TRADE_WK);h+='<tr><td class="l"><b>'+p.name+'</b></td><td><span class="mg-pos mg-'+mgmtPosC(p.pos)+'">'+p.pos+'</span></td><td class="l">'+p.team+'</td><td class="l">'+(ssOppStr(p.team,TRADE_WK)||'—')+'</td><td class="l">'+ssMchip(ease)+'</td><td>'+(x.mr?'#'+x.mr:'—')+'</td><td><b>'+x.tw.toFixed(1)+'</b></td><td>'+x.ros.toFixed(0)+'</td></tr>';});
  h+='</tbody></table></div>';return h;}
 function ssSleeperBox(){let h='<div class="mg-flag mg-ok" style="margin-bottom:12px">';if(!SS.sl.leagues.length){h+='<div style="font-weight:700;margin-bottom:6px">Connect Sleeper</div><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><input id="sluser" value="'+esc(SS.sl.user||'')+'" placeholder="Sleeper username" oninput="ssSlSetUser(this.value)" style="padding:7px 9px;border-radius:8px;border:1px solid #cfd8e0;font-size:13px"><button class="posbtn" style="padding:6px 14px;font-weight:700" onclick="ssSlLoadUser()">'+(SS.sl.loading?'Loading…':'Load my leagues')+'</button></div>';}else{h+='<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><span style="font-weight:700">'+esc(SS.sl.disp||SS.sl.user)+'</span><select onchange="ssSlPickLeague(this.value)" style="padding:6px 10px;border-radius:8px;font-weight:600"><option value="-1">Pick a league…</option>'+SS.sl.leagues.map((l,i)=>'<option value="'+i+'"'+(i===SS.sl.lgi?' selected':'')+'>'+esc(l.name)+'</option>').join('')+'</select><button class="posbtn" style="padding:5px 11px" onclick="SS.sl.leagues=[];SS.sl.lgi=-1;ssSave();renderMgmt()">Switch user</button>'+(SS.sl.loading?'<span class="mg-team">loading…</span>':'')+'</div>';}if(SS.sl.err)h+='<div style="color:#b00020;font-size:12px;margin-top:6px">'+SS.sl.err+'</div>';h+='<div style="font-size:11px;opacity:.7;margin-top:6px">Read-only. Your Sleeper username stays in your browser. ESPN &amp; Yahoo can’t be synced from a static page.</div></div>';return h;}
+const WKRK={"wk":6,"byes":["CIN","DET","MIA","MIN"],"teams":{"SEA":{"opp":"DEN","ha":"A","ml":-142.0,"win":0.563,"spread":-2.5,"total":40.5,"impl":21.5,"oppImpl":19.0},"DEN":{"opp":"SEA","ha":"H","ml":120.0,"win":0.437,"spread":2.5,"total":40.5,"impl":19.0,"oppImpl":21.5},"HOU":{"opp":"JAX","ha":"A","ml":120.0,"win":0.437,"spread":2.5,"total":42.5,"impl":20.0,"oppImpl":22.5},"JAX":{"opp":"HOU","ha":"H","ml":-142.0,"win":0.563,"spread":-2.5,"total":42.5,"impl":22.5,"oppImpl":20.0},"CHI":{"opp":"ATL","ha":"A","ml":-115.0,"win":0.511,"spread":-1.5,"total":51.5,"impl":26.5,"oppImpl":25.0},"ATL":{"opp":"CHI","ha":"H","ml":-105.0,"win":0.489,"spread":1.5,"total":51.5,"impl":25.0,"oppImpl":26.5},"BAL":{"opp":"CLE","ha":"A","ml":-230.0,"win":0.669,"spread":-4.5,"total":41.5,"impl":23.0,"oppImpl":18.5},"CLE":{"opp":"BAL","ha":"H","ml":190.0,"win":0.331,"spread":4.5,"total":41.5,"impl":18.5,"oppImpl":23.0},"TEN":{"opp":"IND","ha":"A","ml":270.0,"win":0.259,"spread":7.0,"total":44.5,"impl":18.8,"oppImpl":25.8},"IND":{"opp":"TEN","ha":"H","ml":-340.0,"win":0.741,"spread":-7.0,"total":44.5,"impl":25.8,"oppImpl":18.8},"NYJ":{"opp":"NE","ha":"A","ml":260.0,"win":0.266,"spread":7.5,"total":43.5,"impl":18.0,"oppImpl":25.5},"NE":{"opp":"NYJ","ha":"H","ml":-325.0,"win":0.734,"spread":-7.5,"total":43.5,"impl":25.5,"oppImpl":18.0},"NO":{"opp":"NYG","ha":"A","ml":-115.0,"win":0.511,"spread":-1.5,"total":45.5,"impl":23.5,"oppImpl":22.0},"NYG":{"opp":"NO","ha":"H","ml":-105.0,"win":0.489,"spread":1.5,"total":45.5,"impl":22.0,"oppImpl":23.5},"CAR":{"opp":"PHI","ha":"A","ml":-180.0,"win":0.616,"spread":-3.5,"total":38.5,"impl":21.0,"oppImpl":17.5},"PHI":{"opp":"CAR","ha":"H","ml":150.0,"win":0.384,"spread":3.5,"total":38.5,"impl":17.5,"oppImpl":21.0},"PIT":{"opp":"TB","ha":"A","ml":-148.0,"win":0.572,"spread":-2.5,"total":39.5,"impl":21.0,"oppImpl":18.5},"TB":{"opp":"PIT","ha":"H","ml":124.0,"win":0.428,"spread":2.5,"total":39.5,"impl":18.5,"oppImpl":21.0},"ARI":{"opp":"LA","ha":"A","ml":600.0,"win":0.137,"spread":12.5,"total":51.5,"impl":19.5,"oppImpl":32.0},"LA":{"opp":"ARI","ha":"H","ml":-900.0,"win":0.863,"spread":-12.5,"total":51.5,"impl":32.0,"oppImpl":19.5},"LAC":{"opp":"KC","ha":"A","ml":370.0,"win":0.204,"spread":8.5,"total":42.5,"impl":17.0,"oppImpl":25.5},"KC":{"opp":"LAC","ha":"H","ml":-485.0,"win":0.796,"spread":-8.5,"total":42.5,"impl":25.5,"oppImpl":17.0},"BUF":{"opp":"LV","ha":"A","ml":-250.0,"win":0.685,"spread":-5.5,"total":53.5,"impl":29.5,"oppImpl":24.0},"LV":{"opp":"BUF","ha":"H","ml":205.0,"win":0.315,"spread":5.5,"total":53.5,"impl":24.0,"oppImpl":29.5},"DAL":{"opp":"GB","ha":"A","ml":100.0,"win":0.478,"spread":1.5,"total":53.5,"impl":26.0,"oppImpl":27.5},"GB":{"opp":"DAL","ha":"H","ml":-120.0,"win":0.522,"spread":-1.5,"total":53.5,"impl":27.5,"oppImpl":26.0},"WAS":{"opp":"SF","ha":"A","ml":330.0,"win":0.223,"spread":7.5,"total":51.5,"impl":22.0,"oppImpl":29.5},"SF":{"opp":"WAS","ha":"H","ml":-425.0,"win":0.777,"spread":-7.5,"total":51.5,"impl":29.5,"oppImpl":22.0}}};
+/* ===== Weekly Rankings (Set Your Lineup) ===== */
+let WKUI=(function(){try{return JSON.parse(localStorage.getItem('ffwkui'))||{}}catch(e){return{}}})();
+if(!WKUI.pos)WKUI.pos='FLEX';if(WKUI.winPts==null)WKUI.winPts=5;if(WKUI.marginPer==null)WKUI.marginPer=0.5;if(WKUI.lossPts==null)WKUI.lossPts=0;
+function wkuiSave(){try{localStorage.setItem('ffwkui',JSON.stringify(WKUI))}catch(e){}}
+function setWkPos(p){WKUI.pos=p;wkuiSave();renderWkRank();}
+function setWkHC(k,v){var n=parseFloat(v);if(isNaN(n)){return;}WKUI[k]=n;wkuiSave();renderWkRank();}
+function wkWeekPlayers(){var w=(D.scorings[state.scoring]&&D.scorings[state.scoring].weeks&&D.scorings[state.scoring].weeks[WKRK.wk])||{players:[]};return (w.players||[]).map(function(r){return {name:r[0],team:r[1],pos:r[2],opp:r[3],match:r[4],proj:r[5]};});}
+function wkPulse(name,pos){var P=D.pulse;if(!P||!P.items){return null;}var q=nrm(name);for(var i=0;i<P.items.length;i++){var it=P.items[i];if(it.pos===pos&&nrm(it.n)===q){return it;}}return null;}
+function wkPulseEmoji(s){return s==='rising'?'🔥':s==='buy'?'🟢':s==='sell'?'🟠':s==='fading'?'🔴':'⚪';}
+function wkPulseNudge(s){return s==='rising'?0.05:s==='buy'?0.03:s==='sell'?-0.03:s==='fading'?-0.05:0;}
+function wkStatus(name,pos,team){
+ if(WKRK.byes.indexOf(team)>=0){return{mult:0,badge:'BYE',cls:'wk-bye'};}
+ var k=nrm(name)+'|'+pos;var s=(D.inj&&D.inj[k])||null;var ou=(D.out_until&&D.out_until[k])||0;
+ if(ou&&WKRK.wk<ou){return{mult:0,badge:'OUT→Wk'+ou,cls:'wk-out'};}
+ if(s==='IR'){return{mult:0,badge:'IR',cls:'wk-out'};}
+ if(s==='OUT'){return{mult:0.05,badge:'OUT',cls:'wk-out'};}
+ if(s==='D'){return{mult:0.5,badge:'D',cls:'wk-q'};}
+ if(s==='Q'){return{mult:0.9,badge:'Q',cls:'wk-q'};}
+ return{mult:1,badge:'',cls:''};
+}
+function wkYours(name,pos,team){
+ if(typeof MGMT_LEAGUES==='undefined'){return null;}
+ var q=nrm(name);
+ for(var i=0;i<MGMT_LEAGUES.length;i++){var r=MGMT_LEAGUES[i].roster||[];
+  for(var j=0;j<r.length;j++){var p=r[j];
+   if(pos==='DST'||pos==='HC'){if(p.pos===(pos==='DST'?'D/ST':'HC')&&p.nfl===team){return true;}}
+   else if(nrm(p.n)===q&&mgmtPosC(p.pos)===pos){return true;}
+  }
+ }
+ return false;
+}
+function wkOwnCell(yours){if(yours===null){return '';}return '<td>'+(yours?'<span class="wk-own">✓ yours</span>':'<span style="opacity:.4">—</span>')+'</td>';}
+function wkOwnHead(){return (typeof MGMT_LEAGUES!=='undefined'&&MGMT_LEAGUES.length>0)?'<th>Roster</th>':'';}
+function wkRowsSkill(posFilter){
+ var set=(posFilter==='FLEX')?['RB','WR','TE']:[posFilter];
+ var out=[];
+ wkWeekPlayers().forEach(function(p){
+  if(set.indexOf(p.pos)<0){return;}
+  var st=wkStatus(p.name,p.pos,p.team);var pu=wkPulse(p.name,p.pos);var nud=pu?wkPulseNudge(pu.sent):0;
+  var score=(p.proj||0)*st.mult*(1+nud);
+  out.push({name:p.name,team:p.team,pos:p.pos,opp:p.opp,match:p.match,proj:p.proj,mr:(typeof liveModelRank==='function'?liveModelRank(p.name,p.pos):null),pu:pu,st:st,nud:nud,score:score});
+ });
+ out.sort(function(a,b){return b.score-a.score;});
+ return out;
+}
+function wkRowsDST(){
+ var out=[];
+ wkWeekPlayers().filter(function(p){return p.pos==='DST';}).forEach(function(p){
+  var od=WKRK.teams[p.team]||null;var oppImpl=od?od.oppImpl:null,win=od?od.win:null;var base=p.proj||0;
+  var f1=(oppImpl==null)?1:Math.max(0.75,Math.min(1.25,1+0.18*((21.5-oppImpl)/6)));
+  var f2=(win==null)?1:Math.max(0.85,Math.min(1.15,1+0.24*(win-0.5)));
+  out.push({name:p.name,team:p.team,opp:p.opp,match:p.match,proj:base,oppImpl:oppImpl,win:win,score:base*f1*f2});
+ });
+ out.sort(function(a,b){return b.score-a.score;});
+ return out;
+}
+function wkRowsHC(){
+ var out=[];
+ for(var t in WKRK.teams){var v=WKRK.teams[t];var expM=Math.max(-v.spread,3);
+  var pts=v.win*(WKUI.winPts+WKUI.marginPer*expM)+(1-v.win)*WKUI.lossPts;
+  out.push({team:t,opp:v.opp,ha:v.ha,win:v.win,spread:v.spread,total:v.total,impl:v.impl,score:pts});
+ }
+ out.sort(function(a,b){return b.score-a.score;});
+ return out;
+}
+function wkBadge(st){return st.badge?('<span class="wkb '+st.cls+'">'+st.badge+'</span>'):'';}
+function wkPuCell(pu){if(!pu){return '<td>—</td>';}var t=(pu.take||'').replace(/"/g,'&quot;');return '<td title="'+t+'">'+wkPulseEmoji(pu.sent)+'</td>';}
+function renderWkRank(){
+ var m=document.getElementById('main');
+ if(typeof WKRK==='undefined'||!WKRK.teams){m.innerHTML='<p class="note">No weekly odds loaded.</p>';return;}
+ var pos=WKUI.pos;var own=(typeof MGMT_LEAGUES!=='undefined'&&MGMT_LEAGUES.length>0);
+ var POSL=[['QB','QB'],['RB','RB'],['WR','WR'],['TE','TE'],['FLEX','FLEX'],['DST','D/ST'],['HC','HC']];
+ var tabs='<div style="display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 10px">'+POSL.map(function(p){return '<button class="posbtn '+(pos===p[0]?'on':'')+'" onclick="setWkPos(\''+p[0]+'\')">'+p[1]+'</button>';}).join('')+'</div>';
+ var sty='<style>.wkb{font-size:9px;font-weight:800;padding:1px 6px;border-radius:9px}.wk-bye{background:#e2e8f0;color:#475569}.wk-out{background:#f3c9c9;color:#7a1414}.wk-q{background:#f6e6b0;color:#6b5300}.wk-own{color:#1b7f3b;font-weight:800;font-size:11px}.wk-pos{font-weight:800;font-size:10px;padding:1px 5px;border-radius:4px;color:#33424f;background:#dce6ef}.wkhc-in{width:52px;padding:4px 6px;border-radius:6px;border:1px solid #cfd8e0;font-size:12px}</style>';
+ var note,head,body;
+ if(pos==='HC'){
+  var rows=wkRowsHC();
+  note='<p class="note"><b>Head Coach streaming</b> — projected fantasy points under <b>win + margin-of-victory</b> scoring, driven by this week’s Vegas <b>moneyline</b> (win probability) and <b>spread</b> (expected margin). Set your league’s values below. Formula: <code>win% × (win pts + margin pts × expected margin) + loss% × loss pts</code>. Biggest favorites rank highest.</p>';
+  var ctl='<div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin:0 0 10px;font-size:12px"><span>Win pts <input class="wkhc-in" type="number" step="0.5" value="'+WKUI.winPts+'" onchange="setWkHC(\'winPts\',this.value)"></span><span>Pts per margin-pt <input class="wkhc-in" type="number" step="0.1" value="'+WKUI.marginPer+'" onchange="setWkHC(\'marginPer\',this.value)"></span><span>Loss pts <input class="wkhc-in" type="number" step="0.5" value="'+WKUI.lossPts+'" onchange="setWkHC(\'lossPts\',this.value)"></span></div>';
+  head='<tr><th>#</th><th class="l">Coach (team)</th><th class="l">Opp</th><th>Win%</th><th>Spread</th><th>Proj HC pts</th>'+wkOwnHead()+'</tr>';
+  body=rows.map(function(r,i){var y=own?wkYours(r.team,'HC',r.team):null;return '<tr><td>'+(i+1)+'</td><td class="l"><b>'+r.team+'</b> <span style="opacity:.6;font-size:11px">HC</span></td><td class="l">'+(r.ha==='H'?'vs ':'@ ')+r.opp+'</td><td>'+Math.round(r.win*100)+'%</td><td>'+(r.spread>0?'+':'')+r.spread+'</td><td><b>'+r.score.toFixed(1)+'</b></td>'+wkOwnCell(y)+'</tr>';}).join('');
+  body=ctl+'<div class="tablewrap"><table><thead>'+head+'</thead><tbody>'+body+'</tbody></table></div>';
+ }else if(pos==='DST'){
+  var rd=wkRowsDST();
+  note='<p class="note"><b>Defense streaming</b> — ranked by a weekly <b>Stream</b> score: the model’s matchup projection boosted by Vegas signal — lower <b>opponent implied points</b> (fewer points to allow) and a higher <b>win%</b> (favored → opponent trails → more sacks/INTs). <b>Proj</b> is the base model DST projection; <b>Matchup</b> is the 0–100 opponent-softness grade. Teams on bye are excluded.</p>';
+  head='<tr><th>#</th><th class="l">Defense</th><th class="l">Opp</th><th>Stream</th><th>Proj</th><th>Opp Impl</th><th>Win%</th><th>Matchup</th>'+wkOwnHead()+'</tr>';
+  body='<div class="tablewrap"><table><thead>'+head+'</thead><tbody>'+rd.map(function(r,i){var y=own?wkYours(r.name,'DST',r.team):null;return '<tr><td>'+(i+1)+'</td><td class="l"><b>'+r.name+'</b></td><td class="l">vs '+r.opp+'</td><td><b>'+r.score.toFixed(1)+'</b></td><td>'+r.proj.toFixed(1)+'</td><td>'+(r.oppImpl==null?'—':r.oppImpl.toFixed(1))+'</td><td>'+(r.win==null?'—':Math.round(r.win*100)+'%')+'</td><td>'+(r.match==null?'—':r.match)+'</td>'+wkOwnCell(y)+'</tr>';}).join('')+'</tbody></table></div>';
+ }else{
+  var rs=wkRowsSkill(pos);
+  note='<p class="note"><b>'+pos+' weekly rankings</b> — blended start-order for Week '+WKRK.wk+' · <b>'+state.scoring+'</b>. Score = <b>model weekly projection</b> (PPG × opponent matchup × explosive amplifier) × <b>injury/bye</b> status × a small <b>Analyst Pulse</b> nudge (🔥/🟢 up, 🟠/🔴 down). <b>Model</b> is season-long board rank; <b>Matchup</b> is the 0–100 opponent grade; hover <b>Pulse</b> for the take. OUT/IR/BYE drop to the bottom.</p>';
+  head='<tr><th>#</th><th class="l">Player</th>'+(pos==='FLEX'?'<th>Pos</th>':'')+'<th class="l">Tm</th><th class="l">Opp</th><th>Score</th><th>Proj</th><th>Matchup</th><th>Model</th><th>Pulse</th>'+wkOwnHead()+'</tr>';
+  body='<div class="tablewrap"><table><thead>'+head+'</thead><tbody>'+rs.map(function(r,i){var y=own?wkYours(r.name,r.pos,r.team):null;return '<tr><td>'+(i+1)+'</td><td class="l"><b>'+r.name+'</b>'+wkBadge(r.st)+'</td>'+(pos==='FLEX'?'<td><span class="wk-pos">'+r.pos+'</span></td>':'')+'<td class="l">'+r.team+'</td><td class="l">vs '+r.opp+'</td><td><b>'+r.score.toFixed(1)+'</b></td><td>'+(r.proj==null?'—':r.proj.toFixed(1))+'</td><td>'+(r.match==null?'—':r.match)+'</td><td>'+(r.mr?'#'+r.mr:'—')+'</td>'+wkPuCell(r.pu)+wkOwnCell(y)+'</tr>';}).join('')+'</tbody></table></div>';
+ }
+ m.innerHTML=sty+'<h2 style="margin:2px 0 2px;font-size:19px">Weekly Rankings — Week '+WKRK.wk+'</h2>'+note+tabs+body;
+}
 function renderMgmt(){
  var sty='<style>.mg-b{font-size:9.5px;padding:1px 5px;border-radius:9px;font-weight:800}.mg-q{background:#f6e6b0;color:#6b5300}.mg-ir{background:#f3c9c9;color:#7a1414}.mg-done{background:#d7e0e8;color:#33424f}.mg-pos{font-weight:800;font-size:10.5px;padding:1px 5px;border-radius:4px}.mg-RB{color:#1b6b34;background:#d8f0e0}.mg-WR{color:#14507f;background:#d6e8fa}.mg-QB{color:#8a4310;background:#fbe6d4}.mg-TE{color:#5b3fa8;background:#ece0fb}.mg-DST,.mg-K,.mg-HC{color:#33424f;background:#dce6ef}.mg-flag{margin:8px 0 0;padding:9px 11px;border-radius:9px;font-size:13px;line-height:1.45}.mg-swap{background:#e6f4ea;border:1px solid #a5d6b7;color:#1b5e20}.mg-ok{background:#eef2f6;border:1px solid #cfd8e0;color:#425362}.mg-ok b{color:#243642}.mg-up{background:#d8f0e0;color:#1b6b34;font-size:9.5px;font-weight:800;padding:1px 5px;border-radius:8px}.mg-team{opacity:.65;font-size:11.5px;margin-left:5px}</style>';
  let h=sty+'<p class="note" style="font-size:14px"><b>Analyze your own team.</b> Connect your <b>Sleeper</b> league to load your roster automatically, or <b>enter players manually</b>. Then get model-based Start/Sit, free-agent, and trade analysis. (ESPN &amp; Yahoo require a login/server, so they can’t sync from this page.)</p>';
@@ -1335,6 +1431,8 @@ function renderBody(){
     renderOffseason();
   }else if(state.view==='util'){
     renderUtil();
+  }else if(state.view==='wkrank'){
+    renderWkRank();
   }else{
     renderTeamCtx();
   }
