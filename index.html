@@ -808,7 +808,7 @@ function advBody(rows,cols,effIdx){
 function drawNav(){
   const BUCKETS=[
     ['My leagues',[['mgmt','Team Management'],['trade','Trade Evaluator']]],
-    ['Set your lineup',[['wkrank','Weekly Rankings'],['week','Weekly Matchups'],['dvp','Defense vs Pos']]],
+    ['Set your lineup',[['startsit','Start / Sit'],['wkrank','Weekly Rankings'],['week','Weekly Matchups'],['dvp','Defense vs Pos']]],
     ['Team environment',[['sch','Schedule (SoS)'],['team','Team Context'],['util','Utilization Report']]],
     ['Under the hood',[['master','Player Stats'],['pers','Personnel'],['trench','Trenches'],['pulse','Analyst Pulse']]],
     ['Model',[['model','Model Rankings']]],
@@ -836,7 +836,7 @@ function setTrenchMode(m){state.trenchMode=m;render();}
 function setUtilPos(p){state.utilPos=p;if(typeof persist==='function')persist();render();}
 function setUtilWk(w){state.utilWk=w;if(typeof persist==='function')persist();render();}
 function drawControls(){
-  if(state.view==='mgmt'||state.view==='trade'||state.view==='wkrank'){document.getElementById('controls').innerHTML='';return;}
+  if(state.view==='mgmt'||state.view==='trade'||state.view==='wkrank'||state.view==='startsit'){document.getElementById('controls').innerHTML='';return;}
   let h='';
   h+=`<label class="field">Scoring<select onchange="setScoring(this.value)">${
     D.scoring_options.map(s=>`<option value="${s}" ${s===state.scoring?'selected':''}>${s}</option>`).join('')}</select></label>`;
@@ -1285,6 +1285,101 @@ function wkDrop(targetKey){
  else {var below=(ti<rows.length-1)?rows[ti+1].sv:at-2;neword=(at+below)/2;}
  if(!WKOV[_wkDrag])WKOV[_wkDrag]={};WKOV[_wkDrag].ord=neword;wkovSave();_wkDrag=null;renderWkRank();
 }
+/* ================= Start / Sit tool (Set your lineup) ================= */
+function ssScoringGet(){return state.ssScoring||D.default_scoring||'Half-PPR';}
+function ssWeekGet(){return (typeof WKUI!=='undefined'&&WKUI.week)||WKNOW;}
+function ssFnum(v,d){if(v==null||isNaN(v))return '—';return (d===0)?Math.round(v):(Math.round(v*10)/10).toFixed(1);}
+function ssWeekPlayers(wk,fmt){var sc=D.scorings&&D.scorings[fmt];if(!sc||!sc.weeks||!sc.weeks[wk])return [];return (sc.weeks[wk].players||[]).map(function(r){return {name:r[0],team:r[1],pos:r[2],opp:r[3],match:r[4],proj:r[5]};});}
+var _ssPoolCache=null;
+function ssPool(){if(_ssPoolCache)return _ssPoolCache;var fmt=D.default_scoring||'Half-PPR';var sc=D.scorings&&D.scorings[fmt];var seen={},out=[];if(sc&&sc.weeks){Object.keys(sc.weeks).forEach(function(w){(sc.weeks[w].players||[]).forEach(function(r){var key=nrm(r[0])+'|'+r[2];if(seen[key])return;seen[key]=1;out.push({key:key,name:r[0],team:r[1],pos:r[2]});});});}out.sort(function(a,b){return a.name<b.name?-1:1;});_ssPoolCache=out;return out;}
+function ssResolve(val){if(!val)return null;var q=val.trim().toLowerCase();var pool=ssPool();for(var i=0;i<pool.length;i++){if(pool[i].name.toLowerCase()===q)return pool[i].key;}for(var j=0;j<pool.length;j++){if(pool[j].name.toLowerCase().indexOf(q)>=0)return pool[j].key;}return null;}
+function ssRowFor(key,wk,fmt){var ps=ssWeekPlayers(wk,fmt);for(var i=0;i<ps.length;i++){if(nrm(ps[i].name)+'|'+ps[i].pos===key)return ps[i];}return null;}
+function ssUtil(name,pos,team){var ur=D.util_report;if(!ur||!ur.by_week)return null;function findIn(wk){var t=(ur.by_week[wk]||{})[team]||[];for(var i=0;i<t.length;i++){if(t[i].pos===pos&&nrm(t[i].n)===nrm(name))return t[i];}return null;}var season=findIn('ALL');if(!season)return null;var thru=+ur.thru_week;var rec=[];for(var w=thru;w>=1&&rec.length<2;w--){var r=findIn(String(w));if(r)rec.push(r);}function avg(arr,f){var v=arr.map(function(x){return x[f];}).filter(function(x){return x!=null;});return v.length?v.reduce(function(a,b){return a+b;},0)/v.length:null;}return {season:season,recOppG:avg(rec,'opp_g'),recSnap:avg(rec,'snap'),recXfp:avg(rec,'xfp'),recN:rec.length};}
+function ssEval(slot){var key=state['ss'+slot];if(!key)return {ok:false};var pos=key.split('|')[1];var wk=String(ssWeekGet());var fmt=ssScoringGet();if(typeof WKV==='undefined'||!WKV||!WKV.teams||WKV!==WKWK[wk]){WKV=WKWK[wk]||WKWK[WKNOW];}var row=ssRowFor(key,wk,fmt);var wa=(typeof WKADJ!=='undefined'&&WKADJ[key])||{};var name=row?row.name:(wa.nm||key.split('|')[0]);var team=(row?row.team:wa.tm)||wa.tm||'';var opp=row?row.opp:((WKV&&WKV.teams[team]&&WKV.teams[team].opp)||'BYE');var match=row?row.match:50;var mproj=row?row.proj:(wa.spg||0);
+  var MP={IR:0,INACT:0,OUT:0,DBT:0.1,Q:0.6},BL={IR:'IR',INACT:'INACT',OUT:'OUT',DBT:'Doubtful',Q:'Questionable'};var mult=1,badge='',cls='';
+  if(wa.st&&MP.hasOwnProperty(wa.st)){mult=MP[wa.st];badge=BL[wa.st];cls='wk-out';}
+  else if(wa.prac){badge=(wa.prac==='DNP'?'DNP':'Limited');cls='wk-prac';}
+  if(wa.news==='PLAY'&&!badge){badge='Active';cls='wk-play';}
+  var onbye=(WKV&&WKV.byes&&WKV.byes.indexOf(team)>=0);if(onbye){mult=0;badge='BYE';cls='wk-bye';}
+  var pu=wkPulse(name,pos);var nud=pu?wkPulseNudge(pu.sent):0;
+  var base,score;
+  if(pos==='DST'){var od=(WKV&&WKV.teams[team])||null;var oppImpl=od?od.oppImpl:null,win=od?od.win:null;base=mproj||0;var f1=(oppImpl==null)?1:Math.max(0.75,Math.min(1.25,1+0.18*((21.5-oppImpl)/6)));var f2=(win==null)?1:Math.max(0.85,Math.min(1.15,1+0.24*(win-0.5)));score=base*f1*f2*mult;}
+  else{var bf=(D.modelparts&&D.modelparts.base[fmt])||{},bh=(D.modelparts&&D.modelparts.base['Half-PPR'])||{};var factor=(bf[key]&&bh[key]&&bh[key]>0)?(bf[key]/bh[key]):1;
+    if(wa.spg!=null){var rw=(wa.note==='role up')?0.65:0.45;var prod=((1-rw)*wa.spg+rw*wa.l2)*factor;var mm=1+(((match==null?50:match)-50)/50)*0.12;var rA=1;if(wa.rsnap!=null&&wa.ssnap>=40&&wa.rsnap<wa.ssnap*0.65){rA=Math.max(0.45,wa.rsnap/wa.ssnap+0.25);}base=0.88*(prod*mm*rA)+0.12*(mproj||0);}else{base=(mproj||0)*factor;}
+    score=base*mult*(1+nud);}
+  var comp=(D.modelparts&&D.modelparts.comp[key])||null;var mr=(typeof liveModelRank==='function')?liveModelRank(name,pos):null;
+  var off=(D.line&&D.line.offense[team])||null,def=(D.line&&D.line.defense[opp])||null,lg=(D.line&&D.line.league)||{};
+  var util=ssUtil(name,pos,team);
+  return {ok:true,key:key,name:name,pos:pos,team:team,opp:opp,week:wk,fmt:fmt,proj:base,match:match,score:score,mult:mult,badge:badge,cls:cls,onbye:onbye,
+    recent:{spg:wa.spg,l2:wa.l2,note:wa.note||'',ratio:wa.ratio,rsnap:wa.rsnap,ssnap:wa.ssnap},
+    model:{rank:mr,comp:comp},util:util,pulse:pu,trench:{off:off,def:def,lg:lg}};}
+function ssSetWeek(w){if(typeof WKUI!=='undefined'){WKUI.week=String(w);if(typeof wkuiSave==='function')wkuiSave();}state.ssBlurb='';renderStartSit();}
+function ssSetScoring(f){state.ssScoring=f;state.ssBlurb='';renderStartSit();}
+function ssSetPlayer(slot,val){var k=ssResolve(val);state['ss'+slot]=k;state.ssBlurb='';renderStartSit();}
+function ssClear(slot){state['ss'+slot]=null;state.ssBlurb='';renderStartSit();}
+function ssTrenchEdge(e){if(!e.trench.off||!e.trench.def)return null;var o=e.trench.off,d=e.trench.def,lg=e.trench.lg;var pass=(e.pos==='WR'||e.pos==='TE'||e.pos==='QB');
+  if(pass){var prot=(o.ol_prs_allowed!=null&&lg.ol_prs_allowed!=null)?(o.ol_prs_allowed<lg.ol_prs_allowed?'protects well':'leaks pressure'):null;var rush=(d.prs_rate!=null&&lg.prs_rate!=null)?(d.prs_rate>lg.prs_rate?'heavy pass rush':'mild pass rush'):null;return {kind:'pass',ownProt:o.ol_prs_allowed,oppRush:d.prs_rate,blitz:d.blitz_rate,prwr:d.prwr,pbwr:o.pbwr,txt:(prot&&rush)?(e.team+' OL '+prot+' vs '+e.opp+' '+rush):null};}
+  var runb=(o.ryoe!=null)?(o.ryoe>(lg.ryoe||0)?'generates push':'below-avg push'):null;var stuff=(d.stuff_rate!=null&&lg.stuff_rate!=null)?(d.stuff_rate>lg.stuff_rate?'stout run front':'soft run front'):null;return {kind:'run',ownRyoe:o.ryoe,oppStuff:d.stuff_rate,rswr:d.rswr,rbwr:o.rbwr,txt:(runb&&stuff)?(e.team+' run-block '+runb+' vs '+e.opp+' '+stuff):null};}
+function ssBuildData(e){var t=ssTrenchEdge(e);var u=e.util;return {name:e.name,pos:e.pos,team:e.team,opponent:e.opp,week:+e.week,scoring:e.fmt,
+  weekly_projection_pts:Math.round((e.proj||0)*10)/10,matchup_score_0to100:e.match,model_start_score:Math.round((e.score||0)*10)/10,
+  status:e.badge||'Active',
+  recent_form:{season_ppg_halfppr:e.recent.spg,last2_ppg:e.recent.l2,role_note:e.recent.note||'stable',usage_ratio_recent_vs_season:e.recent.ratio},
+  utilization:u?{season_snap_pct:u.season.snap,season_opp_per_g:u.season.opp_g,season_wopr:u.season.wopr,season_xfp:u.season.xfp,recent_opp_per_g:u.recOppG==null?null:Math.round(u.recOppG*10)/10,recent_snap_pct:u.recSnap==null?null:Math.round(u.recSnap*10)/10,recent_xfp:u.recXfp==null?null:Math.round(u.recXfp*10)/10,trend:(u.recOppG!=null&&u.season.opp_g!=null)?(u.recOppG>u.season.opp_g*1.1?'usage trending up':(u.recOppG<u.season.opp_g*0.9?'usage trending down':'usage steady')):null}:null,
+  model:e.model.comp?{rest_of_season_rank:e.model.rank,components:{efficiency:e.model.comp.eff,volume_score:e.model.comp.score,role:e.model.comp.role,explosiveness:e.model.comp.expl,trend:e.model.comp.trend,vacated_volume:e.model.comp.vac}}:{rest_of_season_rank:e.model.rank},
+  trenches:t?{focus:t.kind,summary:t.txt,own_pass_pro_prs_allowed:t.ownProt,own_ryoe_att:t.ownRyoe,opp_pressure_rate:t.oppRush,opp_stuff_rate:t.oppStuff,opp_blitz_rate:t.blitz,opp_pass_rush_winrate:t.prwr,opp_run_stop_winrate:t.rswr}:null,
+  analyst_pulse:e.pulse?{sentiment:e.pulse.sent,confidence:e.pulse.conf,model_vs_market:e.pulse.div,note:e.pulse.dn,take:e.pulse.take}:null};}
+function ssVerdict(A,B){if(!A.ok||!B.ok)return null;if(A.mult===0&&B.mult>0)return {win:'B',reason:(A.badge||'inactive')};if(B.mult===0&&A.mult>0)return {win:'A',reason:(B.badge||'inactive')};var diff=(A.score||0)-(B.score||0);var win=diff>=0?'A':'B';var lead=Math.abs(diff);var conf=lead<0.8?'narrow':(lead<2.5?'clear':'strong');return {win:win,lead:Math.round(lead*10)/10,conf:conf};}
+function ssFallbackBlurb(A,B,v){function line(e){var s=e.name+' ('+e.pos+', '+e.team+' vs '+e.opp+'): proj '+ssFnum(e.proj)+' pts, matchup '+(e.match!=null?e.match+'/100':'n/a')+', L2 '+ssFnum(e.recent.l2)+' vs season '+ssFnum(e.recent.spg)+'.';var u=e.util;if(u&&u.recOppG!=null&&u.season.opp_g!=null){s+=' Usage '+(u.recOppG>u.season.opp_g*1.1?'trending up':(u.recOppG<u.season.opp_g*0.9?'trending down':'steady'))+' ('+ssFnum(u.recOppG)+' opp/g recent vs '+ssFnum(u.season.opp_g)+' season).';}var t=ssTrenchEdge(e);if(t&&t.txt)s+=' Trenches: '+t.txt+'.';if(e.pulse)s+=' Analysts: '+e.pulse.sent+(e.pulse.conf?' ('+e.pulse.conf+' conf)':'')+'.';if(e.model&&e.model.rank)s+=' Model ROS rank #'+e.model.rank+'.';return s;}
+  var w=(v&&v.win==='A')?A:B;var out='START: '+w.name+'. ';out+=line(A)+'\n\n'+line(B)+'\n\nEdge: '+w.name+(v&&v.lead?(' by ~'+v.lead+' projected pts ('+v.conf+').'):'.');return out;}
+function ssAsk(){var A=ssEval('A'),B=ssEval('B');if(!A.ok||!B.ok){state.ssBlurb='Pick two players first.';renderStartSit();return;}var v=ssVerdict(A,B);var da=ssBuildData(A),db=ssBuildData(B);
+  state.ssBusy=true;state.ssBlurb='';renderStartSit();
+  var prompt='You are a sharp fantasy football analyst. It is Week '+A.week+', '+A.fmt+' scoring. Decide who to START between these two players and explain why. In 150-200 words: (1) one short sentence per player on how each performs individually (recent form vs season), (2) their team environment and how it shapes the player, (3) the Week '+A.week+' matchup impact including offensive/defensive line (trenches) edges, (4) what analyst pulse and the model say. End with a clear one-line verdict naming who to start. Use the structured data for both players. Player A = '+A.name+', Player B = '+B.name+'. Data: '+JSON.stringify([da,db]);
+  function done(txt){state.ssBusy=false;state.ssBlurb=txt;renderStartSit();}
+  try{
+    if(window.cowork&&window.cowork.askClaude){
+      Promise.resolve(window.cowork.askClaude(prompt,[da,db])).then(function(res){var t=(typeof res==='string')?res:(res&&(res.text||res.output||res.content||res.message))||'';if(!t)t=ssFallbackBlurb(A,B,v);done(t);}).catch(function(err){done(ssFallbackBlurb(A,B,v)+'\n\n(Live AI unavailable: '+(err&&err.message||err)+')');});
+    } else {
+      done(ssFallbackBlurb(A,B,v)+'\n\n(Open this in the Claude app for the full AI write-up; the public page shows this data summary instead.)');
+    }
+  }catch(e){done(ssFallbackBlurb(A,B,v));}
+}
+function ssCard(e,isWin){if(!e.ok)return '<div style="flex:1;min-width:240px;border:1px dashed #cfd8e0;border-radius:12px;padding:16px;opacity:.7">Select a player…</div>';
+  var ring=isWin?'border:2px solid #38a169;box-shadow:0 0 0 3px rgba(56,161,105,.15)':'border:1px solid #cfd8e0';
+  var pe=e.pulse?wkPulseEmoji(e.pulse.sent):'';var badge=e.badge?('<span class="'+e.cls+'" style="font-size:11px;padding:1px 7px;border-radius:10px;margin-left:6px">'+e.badge+'</span>'):'';
+  var u=e.util;var trend=(u&&u.recOppG!=null&&u.season.opp_g!=null)?(u.recOppG>u.season.opp_g*1.1?'▲ up':(u.recOppG<u.season.opp_g*0.9?'▼ down':'▬ steady')):'—';
+  var t=ssTrenchEdge(e);
+  var rows=[['Projection ('+e.fmt.replace('Half-PPR','Half').replace('Standard','Std')+')','<b>'+ssFnum(e.proj)+'</b> pts'],
+    ['Matchup score',(e.match!=null?e.match+' / 100':'—')],
+    ['Recent (L2 / season)',ssFnum(e.recent.l2)+' / '+ssFnum(e.recent.spg)],
+    ['Usage trend',trend+(u&&u.recOppG!=null?(' ('+ssFnum(u.recOppG)+' opp/g)'):'')],
+    ['Model ROS rank',e.model.rank?('#'+e.model.rank):'—'],
+    ['Trenches',t&&t.txt?t.txt:'—'],
+    ['Analyst pulse',e.pulse?(pe+' '+e.pulse.sent+(e.pulse.conf?' · '+e.pulse.conf:'')):'—']];
+  var h='<div style="flex:1;min-width:240px;border-radius:12px;padding:14px 16px;'+ring+'">';
+  h+='<div style="font-weight:800;font-size:16px">'+(isWin?'✅ ':'')+e.name+badge+'</div>';
+  h+='<div style="opacity:.7;font-size:12px;margin-bottom:8px">'+e.pos+' · '+e.team+' vs '+e.opp+' · Wk '+e.week+'</div>';
+  h+='<table style="width:100%;font-size:12.5px;border-collapse:collapse">'+rows.map(function(r){return '<tr><td style="padding:3px 0;opacity:.65">'+r[0]+'</td><td style="padding:3px 0;text-align:right">'+r[1]+'</td></tr>';}).join('')+'</table>';
+  h+='</div>';return h;}
+function renderStartSit(){var m=document.getElementById('main');var wk=String(ssWeekGet());var fmt=ssScoringGet();if(typeof WKWK==='undefined'){m.innerHTML='<p class="note">Weekly data not loaded.</p>';return;}WKV=WKWK[wk]||WKWK[WKNOW];
+  var pool=ssPool();var dl='<datalist id="ssdlist">'+pool.map(function(p){return '<option value="'+p.name.replace(/"/g,'&quot;')+'">'+p.pos+' · '+p.team+'</option>';}).join('')+'</datalist>';
+  var A=ssEval('A'),B=ssEval('B');var v=(A.ok&&B.ok)?ssVerdict(A,B):null;
+  var wkSel='<select onchange="ssSetWeek(this.value)" style="padding:3px 7px;border-radius:6px;border:1px solid #cfd8e0">'+Object.keys(WKWK).sort(function(a,b){return (+a)-(+b);}).map(function(w){return '<option value="'+w+'"'+(w===wk?' selected':'')+'>Week '+w+(w===WKNOW?' — current':((+w)<(+WKNOW)?' (past)':' (ahead)'))+'</option>';}).join('')+'</select>';
+  var fmtBtns=['Standard','Half-PPR','PPR'].map(function(f){return '<button class="posbtn '+(f===fmt?'on':'')+'" onclick="ssSetScoring(\''+f+'\')">'+(f==='Half-PPR'?'Half PPR':(f==='PPR'?'Full PPR':'Standard'))+'</button>';}).join(' ');
+  var valA=A.ok?A.name:'';var valB=B.ok?B.name:'';
+  var h='';
+  h+='<p class="note"><b>Start / Sit.</b> Pick any two players, choose your scoring, and get a recommended start based on the model projection and weekly matchup. The <b>Who should I start?</b> write-up covers individual form, team environment, the week\'s matchup (including offensive/defensive line edges), analyst pulse, and the model\'s view. Projection and recommendation update with the week and scoring format.</p>';
+  h+=dl;
+  h+='<div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin:4px 0 14px"><label style="font-size:13px">Week '+wkSel+'</label><span style="font-size:13px;opacity:.75">Scoring:</span>'+fmtBtns+'</div>';
+  h+='<div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px">';
+  h+='<div style="flex:1;min-width:240px"><div style="font-size:12px;opacity:.7;margin-bottom:4px">Player A</div><input list="ssdlist" value="'+valA.replace(/"/g,'&quot;')+'" placeholder="Search a player…" onchange="ssSetPlayer(\'A\',this.value)" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid #cfd8e0;font-size:13px"></div>';
+  h+='<div style="flex:1;min-width:240px"><div style="font-size:12px;opacity:.7;margin-bottom:4px">Player B</div><input list="ssdlist" value="'+valB.replace(/"/g,'&quot;')+'" placeholder="Search a player…" onchange="ssSetPlayer(\'B\',this.value)" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid #cfd8e0;font-size:13px"></div>';
+  h+='</div>';
+  if(A.ok&&B.ok&&v){var wname=(v.win==='A'?A.name:B.name);var vtxt=v.reason?('Start <b>'+wname+'</b> — other player is '+v.reason+'.'):('Lean <b>'+wname+'</b>'+(v.lead?(' by ~'+v.lead+' projected pts ('+v.conf+' edge).'):'.'));
+    h+='<div style="background:rgba(56,161,105,.12);border:1px solid rgba(56,161,105,.4);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:14px">🏈 '+vtxt+' '+(A.pos!==B.pos?'<span style="opacity:.6">(different positions — flex call)</span>':'')+'</div>';}
+  h+='<div style="display:flex;gap:14px;flex-wrap:wrap">'+ssCard(A,v&&v.win==='A')+ssCard(B,v&&v.win==='B')+'</div>';
+  if(A.ok&&B.ok){h+='<div style="margin:16px 0 6px"><button class="posbtn" style="padding:8px 16px;font-size:14px;font-weight:700" onclick="ssAsk()"'+(state.ssBusy?' disabled':'')+'>'+(state.ssBusy?'Analyzing…':'Who should I start?')+'</button></div>';}
+  if(state.ssBlurb){h+='<div style="background:rgba(88,166,255,.08);border:1px solid rgba(88,166,255,.3);border-radius:10px;padding:14px 16px;margin-top:8px;font-size:13.5px;line-height:1.55;white-space:pre-wrap">'+state.ssBlurb.replace(/</g,'&lt;').replace(/&lt;b&gt;/g,'<b>').replace(/&lt;\/b&gt;/g,'</b>')+'</div>';}
+  m.innerHTML=h;}
 function wkRowsSkill(posFilter){
  WKV=WKWK[WKUI.week]||WKWK[WKNOW];
  var set=(posFilter==='FLEX')?['RB','WR','TE']:[posFilter];
@@ -1524,6 +1619,8 @@ function renderBody(){
     renderUtil();
   }else if(state.view==='wkrank'){
     renderWkRank();
+  }else if(state.view==='startsit'){
+    renderStartSit();
   }else{
     renderTeamCtx();
   }
