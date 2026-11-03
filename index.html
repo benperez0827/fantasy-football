@@ -1501,7 +1501,7 @@ function renderTrenchQB(){
  rows.forEach(function(r){r.drop=(r.c_epa!=null&&r.p_epa!=null)?+(r.c_epa-r.p_epa).toFixed(2):null;});
  rows=uhApplyObj('qbprs',rows,F,'res');
  var cols=[['QB','l'],['Tm','l'],['DB',''],['Prs faced%',''],['Hit/Sk%',''],['Clean EPA',''],['Prs EPA',''],['Drop-off',''],['Prs SR',''],['Cmp% (hit)',''],['YPA (hit)',''],['Sack conv%',''],['Blitz%',''],['vs Blitz EPA',''],['Resil',''],['OOP%',''],['TA%',''],['IW%','']];
- var head='<tr>'+cols.map(function(c,i){return '<th class="'+c[1]+'" onclick="uhSort(\'trench-qb\','+i+')">'+c[0]+uhArrow('qbprs',i)+'</th>';}).join('')+'</tr>';
+ var head='<tr>'+cols.map(function(c,i){return '<th class="'+c[1]+'" onclick="uhSort(\'qbprs\','+i+')">'+c[0]+uhArrow('qbprs',i)+'</th>';}).join('')+'</tr>';
  var N=function(v,s){return v==null?'—':v+(s||'');};var E=function(v,hi,lo){if(v==null)return '<td>—</td>';var c=v>hi?'good':(v<lo?'bad':'');return '<td class="'+c+'">'+(v>0?'+':'')+v.toFixed(2)+'</td>';};var Pc=function(v,hi,lo,inv){if(v==null)return '<td>—</td>';var g=inv?v<lo:v>hi,b=inv?v>hi:v<lo;return '<td class="'+(g?'good':(b?'bad':''))+'">'+v.toFixed(1)+'%</td>';};
  var lg=R.lg||{};
  var body=rows.map(function(r){var rc=r.res>0.5?'good':(r.res<-0.5?'bad':'');var low=r.p_n<20?' <span style="opacity:.5;font-size:10px">('+r.p_n+')</span>':'';
